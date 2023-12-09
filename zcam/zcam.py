@@ -8,15 +8,34 @@
 """ Python wrapper for zcam API """
 
 import os
+from datetime import datetime
 from typing import List
 from enum import Enum
 import requests
 
 
 class Mode(Enum):
-    RECORD = "to_rec"
-    PLAYBACK = "to_pb"
-    STANDBY = "to_standby"
+    TO_PB = "to_pb"
+    TO_REC = "to_rec"
+    TO_STANDBY = "to_standby"
+
+
+class Status(Enum):
+    CAP = "cap"
+    CAP_BURST = "cap_burst"
+    CAP_TL_IDLE = "cap_tl_idle"
+    CAP_TL_ING = "cap_tl_ing"
+    PB = "pb"
+    PB_ING = "pb_ing"
+    PB_PAUSED = "pb_paused"
+    REC = "rec"
+    REC_ING = "rec_ing"
+    REC_PAUSED = "rec_paused"
+    REC_TL = "rec_tl"
+    REC_TL_IDLE = "rec_tl_idle"
+    REC_TL_ING = "rec_tl_ing"
+    STANDBY = "standby"
+    UNKNOWN = "unknown"
 
 
 class ZCamError(Exception):
@@ -37,11 +56,20 @@ class ZCam:
         except FileExistsError:
             pass
 
+    def __get_setting(self, key: str):
+        response = self.__request(f"ctrl/get?k={key}").json()
+        self.__handle_error(response["code"])
+        return response
+
+    def __handle_error(self, code: int):
+        if code != 0:
+            raise ZCamError(f"Request failed, status: {code}")
+
     def __pull_video(self, dst: str, video: str, response: requests.Response):
         with open(os.path.join(dst, video), mode="wb") as fd:
             fd.write(response.content)
 
-    def __request(self, path: str, timeout=None):
+    def __request(self, path: str, timeout=5):
         url = f"http://{self.ip}/{path}"
         try:
             response = requests.get(url, timeout=timeout)
@@ -67,6 +95,15 @@ class ZCam:
     def mode(self, mode: Mode):
         self.__request(f"ctrl/mode?action={mode}")
 
+    def network_router(self):
+        self.__request("ctrl/network?action=set&mode=Router")
+
+    def network_direct(self):
+        self.__request("ctrl/network?action=set&mode=Direct")
+
+    def network_type(self) -> str:
+        self.__request("ctrl/network?action=query").json()["value"]
+
     def pull(self, dst=".", **kwargs):
         self.__create_dir(dst)
         proxy = "proxy" if kwargs.get("proxy", False) else ""
@@ -90,8 +127,51 @@ class ZCam:
                     return
         raise ZCamError("File not found")
 
-    def start(self):
+    def reboot(self):
+        self.__request("ctrl/reboot")
+
+    def recording_start(self):
         self.__request("ctrl/rec?action=start")
 
-    def stop(self):
+    def recording_remain(self):
+        self.__request("ctrl/rec?action=remain")
+
+    def recording_stop(self):
         self.__request("ctrl/rec?action=stop")
+
+    def session_start(self):
+        self.__request("ctrl/session")
+
+    def session_quit(self):
+        self.__request("ctrl/session?action=quit")
+
+    def get_setting_value(self, key: str):
+        return self.__get_setting(key)["value"]
+
+    def get_setting_opts(self, key: str):
+        return self.__get_setting(key)["opts"]
+
+    def is_setting_read_only(self, key: str):
+        if self.__get_setting(key)["ro"] == 1:
+            return True
+        return False
+
+    def set_setting_value(self, key: str, value: str):
+        response = self.__request(f"ctrl/set?{key}={value}").json()
+        self.__handle_error(response["code"])
+
+    def shutdown(self):
+        self.__request("ctrl/shutdown")
+
+    def status(self) -> Status:
+        response = self.__request("ctrl/mode?action=query").json()
+        self.__handle_error(response["code"])
+
+        try:
+            return Status(response["msg"])
+        except ValueError as exc:
+            raise ZCamError(f"Status not found: {exc}") from exc
+
+    def sync_date(self):
+        now = datetime.now().strftime("%Y-%m-%dtime=%H:%M:S")
+        self.__request(f"datetime?date{now}")
