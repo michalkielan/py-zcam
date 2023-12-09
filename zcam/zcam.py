@@ -73,15 +73,22 @@ class ZCam:
         url = f"http://{self.ip}/{path}"
         try:
             response = requests.get(url, timeout=timeout)
-            if response.status_code == 404:
-                raise ZCamError("Error 404 not found")
-
+            status_code = response.status_code
+            if status_code != 200:
+                raise ZCamError(f"The request failed: {status_code}")
             return response
-        except requests.exceptions.Timeout as exc:
-            raise ZCamError("The request timed out") from exc
+
+        except requests.exceptions.HTTPError as exc:
+            raise ZCamError(f"An error occurred: {exc}") from exc
 
         except requests.exceptions.RequestException as exc:
             raise ZCamError(f"An error occurred: {exc}") from exc
+
+        except requests.exceptions.ConnectionError as exc:
+            raise ZCamError(f"An error occurred: {exc}") from exc
+
+        except requests.exceptions.Timeout as exc:
+            raise ZCamError("The request timed out") from exc
 
     def get_dirs(self) -> List[str]:
         return self.__request("DCIM/").json()["files"]
