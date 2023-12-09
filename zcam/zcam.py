@@ -41,10 +41,10 @@ class ZCam:
         with open(os.path.join(dst, video), mode="wb") as fd:
             fd.write(response.content)
 
-    def __request(self, path: str):
+    def __request(self, path: str, timeout=None):
         url = f"http://{self.ip}/{path}"
         try:
-            response = requests.get(url, timeout=5)
+            response = requests.get(url, timeout=timeout)
             if response.status_code == 404:
                 raise ZCamError("Error 404 not found")
 
@@ -70,20 +70,22 @@ class ZCam:
     def pull(self, dst=".", **kwargs):
         self.__create_dir(dst)
         proxy = "proxy" if kwargs.get("proxy", False) else ""
+        timeout = kwargs.get("timeout", None)
         for path in self.get_dirs():
             for video in self.get_files(path):
                 url = f"DCIM/{os.path.join(path, proxy, video)}"
-                response = self.__request(url)
+                response = self.__request(url, timeout)
                 self.__pull_video(dst, video, response)
 
     def pull_video(self, to_download: str, dst=".", **kwargs):
         proxy = "proxy" if kwargs.get("proxy", False) else ""
+        timeout = kwargs.get("timeout", None)
         for path in self.get_dirs():
             for video in self.get_files(path):
                 if to_download == video:
                     self.__create_dir(dst)
                     url = f"DCIM/{os.path.join(path, proxy, video)}"
-                    response = self.__request(url)
+                    response = self.__request(url, timeout)
                     self.__pull_video(dst, video, response)
                     return
         raise ZCamError("File not found")
