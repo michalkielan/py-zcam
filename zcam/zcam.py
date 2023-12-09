@@ -48,7 +48,7 @@ class ZCamError(Exception):
 
 class ZCam:
     def __init__(self, ip: str):
-        self.ip = ip
+        self.__ip = ip
 
     def __create_dir(self, dst: str):
         try:
@@ -70,7 +70,7 @@ class ZCam:
             fd.write(response.content)
 
     def __request(self, path: str, timeout=5):
-        url = f"http://{self.ip}/{path}"
+        url = f"http://{self.__ip}/{path}"
         try:
             response = requests.get(url, timeout=timeout)
             status_code = response.status_code
