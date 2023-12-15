@@ -161,9 +161,7 @@ class ZCam:
         return self.__get_setting(key)["opts"]
 
     def is_setting_read_only(self, key: str):
-        if self.__get_setting(key)["ro"] == 1:
-            return True
-        return False
+        return self.__get_setting(key)["ro"] == 1
 
     def set_setting_value(self, key: str, value: str):
         response = self.__request(f"ctrl/set?{key}={value}").json()
