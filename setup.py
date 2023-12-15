@@ -15,7 +15,7 @@ with io.open("README.rst", encoding="utf-8") as readme_file:
     long_description = readme_file.read()
 
 setup(
-    name="simpleadb",
+    name="zcam",
     version="0.1.0",
     description="Python wrapper for zcam cameras network API.",
     long_description=long_description,
