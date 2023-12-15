@@ -1,10 +1,4 @@
-#
-# file zcam.py
-#
-# SPDX-FileCopyrightText: (c) 2023 Michal Kielan
-#
 # SPDX-License-Identifier: MIT
-#
 """ Python wrapper for zcam API """
 
 import os
