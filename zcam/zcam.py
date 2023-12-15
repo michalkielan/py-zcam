@@ -47,6 +47,8 @@ class ZCamError(Exception):
 
 
 class ZCam:
+    DEFAULT_TIMEOUT = 5
+
     def __init__(self, ip: str):
         self.__ip = ip
 
@@ -69,7 +71,7 @@ class ZCam:
         with open(os.path.join(dst, video), mode="wb") as fd:
             fd.write(response.content)
 
-    def __request(self, path: str, timeout=5):
+    def __request(self, path: str, timeout=DEFAULT_TIMEOUT):
         url = f"http://{self.__ip}/{path}"
         try:
             response = requests.get(url, timeout=timeout)
