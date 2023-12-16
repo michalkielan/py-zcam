@@ -21,8 +21,6 @@ jobs:
       - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest requirements
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Install
         run: |
