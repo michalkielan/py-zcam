@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: MIT
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zcam"
+version = "0.1.0"
+description = "Python wrapper for zcam cameras network API."
+readme = "README.rst"
+authors = [{ name = "Michal Kielan", email = "michalkielan@protonmail.com" }]
+license = { text = "MIT" }
+requires-python = ">3.0.0"
+
+[project.urls]
+"Homepage" = "https://github.com/michalkielan/py-zcam"
+
+[tool.setuptools.packages.find]
+exclude = ["tests", "docs"]
