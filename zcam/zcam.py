@@ -41,9 +41,10 @@ class ZCamError(Exception):
 
 
 class ZCam:
+    DEFAULT_DIRECT_IP = "10.98.32.1"
     DEFAULT_TIMEOUT = 5
 
-    def __init__(self, ip: str):
+    def __init__(self, ip: str = DEFAULT_DIRECT_IP):
         self.__ip = ip
 
     def __create_dir(self, dst: str):
