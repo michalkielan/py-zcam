@@ -1,7 +1,7 @@
 Zcam
 ====
 
-   ZCam API as python library
+   Unofficial ZCam cameras API python library
 
 Usage
 -----
