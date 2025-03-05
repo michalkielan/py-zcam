@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-""" Python wrapper for zcam API """
+"""Python wrapper for zcam API"""
 
 import os
 from datetime import datetime
